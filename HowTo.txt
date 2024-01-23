@@ -1,0 +1,60 @@
+Reconstruction code for NoWait - Inversion
+implementing the iterative MAP-based reconstruction as described in Bibiano et.al. [currently under revision]
+
+If you want to use this code, we highly recommend contacting us, so we might be of help to get it running.
+
+NOTE: 
+the code given here is not self-sufficient and will not run out of the box. You do need ADDITIONAL toolboxes and functionality.
+Specifically:
+ - toolbox for gridding and de-gridding of noncartesian data onto a cartesian grid. Due to the iterative nature of the reconstruction you do need forward and backward operation!
+   We recommend Jeff Fesslers Michigan Image Reconstruction Toolbox (MIRT) - Matlab Version, which is available here: https://github.com/JeffFessler/mirt or here: https://web.eecs.umich.edu/~fessler/irt/
+   Of course you can also use any other toolbox/functionality you have avaiable. That would need to be plugged in wherever the code is marked by: *GRIDDING*
+ - functionality for phase-preserving coil-combination and subsequent seperation (e.g. determination of coil sensitivities)
+   We used an implementation of the algorithm as described in Walsh et.al. [Walsh DO, Gmitro AF, Marcellin MW. Adaptive reconstruction of phased array MR imagery. Magn Reson Med (2000) 43:682–690. doi:10.1002/(SICI)1522-2594(200005)43:5<682::AID-MRM10>3.0.CO;2-G]
+   Add your own where the code is marked by *COIL COMBINATION*
+
+INPUT DATA:
+Meaurement data:
+ of two non-cartesian Look-Locker acquisitions should be stored in '.mat'-files
+- first measurement without any preparation and continious acquisition of non-cartesian readout lines
+- second measurement with inversion preparation and subsequent continious acquisition of non-cartesian readout lines
+The code expects a variable called 'raw' with size=[slices x coils x lines x readout points]
+
+trajectory:
+information on the measured trajectory should be available as '.mat'-file
+The code expects a variable called 'traj'. If using the Fesler toolbox it should be size= [lines x readout points], giving the coordinates of readout points as complex numbers. If using a different toolbox for gridding, setup should be as neeeded there.
+
+STEP-BY-STEP:
+
+you will need the following files from the folder:'reco_scripts_for_paper'
+get_config.m
+paper_map_recos_main.m
+generate_masks.m
+compile_results.m
+
+1. Create a new entry with all the necessary paths in get_config.m and create all output folders
+
+2. Perform the following settings in paper_map_recos_main.m
+	2.1 set 'confnr' to one data setyou want to reconstruct, as set in 'get_config.m'
+	2.2 Set 'onlyreco=1' and 'onlycomb0=1' 
+	2.3 select all slices
+
+3. Run 'paper_map_recos_main.m' to get temporal average reconstructions for all slices
+
+4. Adjust the 'confnr' in 'compile_results.m' and run it, to get aggregated temporal average reconstructions
+
+5. Adjust the paths in 'generate_masks.m' and run it to generate specific masks, adjust the cutoff values there if necessary
+
+------ Do steps 1-5 for all datasets you want to reconstruct, e.g. volunteers 1-10
+
+6. Make sure all paths in 'get_config.m' are correct
+
+7. Perform the following settings in 'paper_map_recos_main.m'
+	7.1 select 'confnr' of all datasets you want to reconstruct, e.g. confnr=[1 2 3]
+	7.2 Set onlyreco=0 and onlycomb0=0
+	7.3 select slices
+
+8. Run 'paper_map_recos_main.m' to perform the iterativ reconstruction
+
+9. Adjust the 'confnr' in 'compile_results.m' and run it, to collect all results
+	
